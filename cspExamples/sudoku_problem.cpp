@@ -2,8 +2,6 @@
 #include "sudoku_problem.h"
 
 
-using CoordsToVarRefsUMap = std::unordered_map<std::pair<unsigned int, unsigned int>, std::reference_wrapper<csp::Variable<unsigned int>>>;
-
 
 namespace std
 {
@@ -142,9 +140,9 @@ static std::vector<std::vector<std::pair<unsigned int, unsigned int>>> __get_blo
 	{
 		std::vector<std::pair<unsigned int, unsigned int>> blockIdxs;
 		blockIdxs.reserve(gridLen);
-		for (unsigned int i = blockStartIndices.first; blockStartIndices.first + blockLen; ++i)
+		for (unsigned int i = blockStartIndices.first; i < blockStartIndices.first + blockLen; ++i)
 		{
-			for (unsigned int j = blockStartIndices.second; blockStartIndices.second + blockLen; ++j)
+			for (unsigned int j = blockStartIndices.second; j < blockStartIndices.second + blockLen; ++j)
 			{
 				blockIdxs.emplace_back(i, j);
 			}
@@ -157,7 +155,7 @@ static std::vector<std::vector<std::pair<unsigned int, unsigned int>>> __get_blo
 static void __init_constraints(std::vector<csp::Variable<unsigned int>>& variables,
 	std::vector<csp::Constraint<unsigned int>>& constraints, CoordsToVarRefsUMap& coordsToVarRefsUMap)
 {
-	unsigned int gridLen = variables.size();
+	unsigned int gridLen = static_cast<unsigned int>(std::sqrt(variables.size()));
 	std::vector<std::vector<std::pair<unsigned int, unsigned int>>> rowIndices = __get_row_indices(gridLen);
 	std::vector<std::vector<std::pair<unsigned int, unsigned int>>> colIndices = __get_column_indices(gridLen);
 	std::vector<std::vector<std::pair<unsigned int, unsigned int>>> blockIndices = __get_block_indices(gridLen);
@@ -197,7 +195,7 @@ static void __init_constraints(std::vector<csp::Variable<unsigned int>>& variabl
 	}
 }
 
-csp::ConstraintProblem<unsigned int> constructSudokuProblem(const char* filePath, std::vector<csp::Variable<unsigned int>>& variables,
+std::pair<csp::ConstraintProblem<unsigned int>, CoordsToVarRefsUMap> constructSudokuProblem(const char* filePath, std::vector<csp::Variable<unsigned int>>& variables,
 	std::vector<csp::Constraint<unsigned int>>& constraints)
 {
 	std::vector<std::vector<unsigned int>> grid = __parse_sudoku_board(filePath);
@@ -206,19 +204,19 @@ csp::ConstraintProblem<unsigned int> constructSudokuProblem(const char* filePath
 
 	std::vector<std::reference_wrapper<csp::Constraint<unsigned int>>> constraintsRefs{ constraints.begin(), constraints.end() };
 	csp::ConstraintProblem<unsigned int> sudokuProblem{ constraintsRefs };
-	return sudokuProblem;
+	return { sudokuProblem, coordsToVarRefsUMap };
 }
 
-void printGrid(CoordsToVarRefsUMap& coordsToVarRefsUMap)
+std::string GetSudokuGridAsString(CoordsToVarRefsUMap& coordsToVarRefsUMap)
 {
 	unsigned int gridLen = static_cast<unsigned int>(std::sqrt(coordsToVarRefsUMap.size()));
 	std::vector<std::vector<unsigned int>> grid;
 	grid.reserve(gridLen);
-	for (std::vector<unsigned int>& row : grid)
+	for (unsigned int i = 0; i < gridLen; ++i)
 	{
-		row.reserve(gridLen);
+		grid.push_back(std::vector<unsigned int>(gridLen, 0));
 	}
-
+	
 	for (auto& coordsToVar : coordsToVarRefsUMap)
 	{
 		const std::pair<unsigned int, unsigned int>& coords = coordsToVar.first;
@@ -236,7 +234,7 @@ void printGrid(CoordsToVarRefsUMap& coordsToVarRefsUMap)
 	unsigned int blockLen = static_cast<unsigned int>(std::sqrt(gridLen));
 	std::unordered_set<unsigned int> midIndices;
 	midIndices.reserve(gridLen);
-	for (unsigned int i = blockLen; i < gridLen; i += gridLen)
+	for (unsigned int i = blockLen; i < gridLen; i += blockLen)
 	{
 		midIndices.insert(i);
 	}
@@ -282,4 +280,14 @@ void printGrid(CoordsToVarRefsUMap& coordsToVarRefsUMap)
 
 		gridStrings.push_back("\n");
 	}
+
+	std::string strGrid = std::accumulate(gridStrings.begin(), gridStrings.end(), std::string(""));
+	return strGrid;
 }
+
+
+// CSPDO:
+// implement SudokuStartStateGenerator
+// implement sudoku_score_calculator
+// implement SudokuSuccessorGenerator
+// implement GeneticSudokuConstraintProblem
