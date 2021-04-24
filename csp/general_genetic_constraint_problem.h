@@ -9,72 +9,6 @@ namespace csp
 	template <typename T>
 	class GeneralGeneticConstraintProblem : public BaseGeneticConstraintProblem<T>
 	{
-	private:
-		std::unordered_set<Ref<Variable<T>>> m_usetReadOnlyVars;
-
-		Assignment<T> reproduce(const Assignment<T>& firstParent, const Assignment<T>& secondParent) const
-		{
-			std::random_device randomDevice;
-			std::default_random_engine defaultRandomEngine{ randomDevice() };
-			std::uniform_real_distribution<double> zeroToOneDistribution(0.0, 1.0);
-			Assignment<T> child;
-			for (Variable<T>& var : this->m_ConstraintProb.getVariables())
-			{
-				if (zeroToOneDistribution(defaultRandomEngine) < 0.5)
-				{
-					child.emplace(var, firstParent.at(std::ref(var)));
-				}
-				else
-				{
-					child.emplace(var, secondParent.at(std::ref(var)));
-				}
-			}
-			return child;
-		}
-
-		void mutate(Assignment<T>& assignment) noexcept
-		{
-			/* for each selected mutation variable assign a new value randomly. */
-			size_t numberOfMutations = static_cast<size_t>(assignment.size() * m_dMutationFraction);
-			if (!numberOfMutations)
-			{
-				return;
-			}
-			const std::vector<Ref<Variable<T>>>& variables = this->m_ConstraintProb.getVariables();
-			std::vector<Ref<Variable<T>>> varsToBeSampledFrom;
-			varsToBeSampledFrom.reserve(variables.size() - m_usetReadOnlyVars.size());
-			for (Variable<T>& var : variables)
-			{
-				if (m_usetReadOnlyVars.count(var))
-				{
-					continue;
-				}
-				varsToBeSampledFrom.emplace_back(var);
-			}
-			
-			std::random_device randomDevice;
-			std::default_random_engine randomDefaultEng{ randomDevice() };
-			std::vector<Ref<Variable<T>>> sampledVars;
-			std::sample(varsToBeSampledFrom.cbegin(), varsToBeSampledFrom.cend(), std::back_inserter(sampledVars), 
-				numberOfMutations, randomDefaultEng);
-
-			for (Variable<T>& var : sampledVars)
-			{
-				T oldVal = var.getValue();
-				size_t domainSize = var.getDomain().size();
-				var.unassign();
-				var.assignWithRandomlySelectedValue();
-				T newVal = var.getValue();
-				while (1 < domainSize && newVal == oldVal)
-				{
-					var.unassign();
-					var.assignWithRandomlySelectedValue();
-					newVal = var.getValue();
-				}
-			}
-		}
-
-
 	public:
 		double m_dMutationFraction;
 
@@ -115,7 +49,7 @@ namespace csp
 
 		std::vector<Assignment<T>> generatePopulation(unsigned int populationSize) override
 		{
-			/* generating individuals by random assignments. */
+			// generating individuals by random assignments.
 			std::vector<Assignment<T>> population;
 			population.reserve(populationSize);
 			for (unsigned i = 0; i < populationSize; ++i)
@@ -136,7 +70,7 @@ namespace csp
 
 		unsigned int calculateFitness(const Assignment<T>& assignment) override
 		{
-			/* fitness is the number of consistent constraints. */
+			// fitness is the number of consistent constraints.
 			this->m_ConstraintProb.unassignAllVariables();
 			this->m_ConstraintProb.assignFromAssignment(assignment);
 			return static_cast<unsigned int>(this->m_ConstraintProb.getConsistentConstraintsSize());
@@ -144,7 +78,7 @@ namespace csp
 		
 		std::vector<Assignment<T>> performNaturalSelection(std::vector<Assignment<T>>& population) override
 		{
-			/* half truncation selection. */
+			// half truncation selection.
 			std::multimap<unsigned int, Ref<Assignment<T>>> scoreToIndividualMap;
 			for (Assignment<T>& assignment : population)
 			{
@@ -193,5 +127,71 @@ namespace csp
 				}
 			}
 		}
+
+
+		private:
+			std::unordered_set<Ref<Variable<T>>> m_usetReadOnlyVars;
+
+			Assignment<T> reproduce(const Assignment<T>& firstParent, const Assignment<T>& secondParent) const
+			{
+				std::random_device randomDevice;
+				std::default_random_engine defaultRandomEngine{ randomDevice() };
+				std::uniform_real_distribution<double> zeroToOneDistribution(0.0, 1.0);
+				Assignment<T> child;
+				for (Variable<T>& var : this->m_ConstraintProb.getVariables())
+				{
+					if (zeroToOneDistribution(defaultRandomEngine) < 0.5)
+					{
+						child.emplace(var, firstParent.at(std::ref(var)));
+					}
+					else
+					{
+						child.emplace(var, secondParent.at(std::ref(var)));
+					}
+				}
+				return child;
+			}
+
+			void mutate(Assignment<T>& assignment) noexcept
+			{
+				// for each selected mutation variable assign a new value randomly.
+				size_t numberOfMutations = static_cast<size_t>(assignment.size() * m_dMutationFraction);
+				if (!numberOfMutations)
+				{
+					return;
+				}
+				const std::vector<Ref<Variable<T>>>& variables = this->m_ConstraintProb.getVariables();
+				std::vector<Ref<Variable<T>>> varsToBeSampledFrom;
+				varsToBeSampledFrom.reserve(variables.size() - m_usetReadOnlyVars.size());
+				for (Variable<T>& var : variables)
+				{
+					if (m_usetReadOnlyVars.count(var))
+					{
+						continue;
+					}
+					varsToBeSampledFrom.emplace_back(var);
+				}
+
+				std::random_device randomDevice;
+				std::default_random_engine randomDefaultEng{ randomDevice() };
+				std::vector<Ref<Variable<T>>> sampledVars;
+				std::sample(varsToBeSampledFrom.cbegin(), varsToBeSampledFrom.cend(), std::back_inserter(sampledVars),
+					numberOfMutations, randomDefaultEng);
+
+				for (Variable<T>& var : sampledVars)
+				{
+					T oldVal = var.getValue();
+					size_t domainSize = var.getDomain().size();
+					var.unassign();
+					var.assignWithRandomlySelectedValue();
+					T newVal = var.getValue();
+					while (1 < domainSize && newVal == oldVal)
+					{
+						var.unassign();
+						var.assignWithRandomlySelectedValue();
+						newVal = var.getValue();
+					}
+				}
+			}
 	};
 }

@@ -19,44 +19,6 @@ namespace csp
 	template <typename T>
 	class Constraint final
 	{
-	private:		
-		static const std::unordered_set<Variable<T>*> init_varsAddresses(const std::vector<Ref<Variable<T>>>& variables)
-		{
-			std::unordered_set<Variable<T>*> varsAddresses;
-			varsAddresses.reserve(variables.size());
-			for (Variable<T>& var : variables)
-			{
-				if (varsAddresses.count(&var))
-				{
-					throw duplicate_variable_error<T>(var);
-				}
-				varsAddresses.insert(&var);
-			}
-			return varsAddresses;
-		}
-
-		void enforce_unary_constraint()
-		{
-			Variable<T>& var = m_vecVariables.back();
-			if (!var.isAssigned())
-			{
-				const std::vector<T> vecConsistentDomain = this->getConsistentDomainValues(var);
-				var.setDomain(vecConsistentDomain);
-			}
-		}
-
-		void verify_variable_is_contained(Variable<T>& var) const
-		{
-			if (!m_usetVariableAddresses.count(&(var)))
-			{
-				throw uncontained_variable_error<T>(*this, var);
-			}
-		}
-
-		std::unordered_set<Variable<T>*> m_usetVariableAddresses;
-		std::vector<Ref<Variable<T>>> m_vecVariables;
-		ConstraintEvaluator<T> m_ceEvaluateConstraint;
-
 	public:
 		Constraint() = delete;
 		Constraint(const std::vector<Ref<Variable<T>>>& variables, const ConstraintEvaluator<T>& evaluateConstraint) :
@@ -209,6 +171,45 @@ namespace csp
 		{
 			return &(left) < &(right);
 		}
+
+
+		private:
+			static const std::unordered_set<Variable<T>*> init_varsAddresses(const std::vector<Ref<Variable<T>>>& variables)
+			{
+				std::unordered_set<Variable<T>*> varsAddresses;
+				varsAddresses.reserve(variables.size());
+				for (Variable<T>& var : variables)
+				{
+					if (varsAddresses.count(&var))
+					{
+						throw duplicate_variable_error<T>(var);
+					}
+					varsAddresses.insert(&var);
+				}
+				return varsAddresses;
+			}
+
+			void enforce_unary_constraint()
+			{
+				Variable<T>& var = m_vecVariables.back();
+				if (!var.isAssigned())
+				{
+					const std::vector<T> vecConsistentDomain = this->getConsistentDomainValues(var);
+					var.setDomain(vecConsistentDomain);
+				}
+			}
+
+			void verify_variable_is_contained(Variable<T>& var) const
+			{
+				if (!m_usetVariableAddresses.count(&(var)))
+				{
+					throw uncontained_variable_error<T>(*this, var);
+				}
+			}
+
+			std::unordered_set<Variable<T>*> m_usetVariableAddresses;
+			std::vector<Ref<Variable<T>>> m_vecVariables;
+			ConstraintEvaluator<T> m_ceEvaluateConstraint;
 	};
 
 

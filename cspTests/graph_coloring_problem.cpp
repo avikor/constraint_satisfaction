@@ -13,6 +13,7 @@ namespace cspTests
 	{
 	public:
 
+		// Australia map coloring problem
 		const std::unordered_set<std::string> domain{ "Red", "Green", "Blue" };
 		const std::unordered_set<std::string> names{ "nt", "q", "nsw", "v", "t", "sa", "wa" };
 		std::unordered_map<std::string, csp::Variable<std::string>> NameToVarUMap = csp::Variable<std::string>::constructFromNamesToEqualDomain(names, domain);
@@ -118,14 +119,14 @@ namespace cspTests
 		TEST_METHOD(TestTreeCspSolver)
 		{
 			easyGraphColoringProb.unassignAllVariables();
-			const csp::AssignmentHistory<std::string> assignmentHistory = csp::treeCspSolver(easyGraphColoringProb);
+			const csp::AssignmentHistory<std::string> assignmentHistory = csp::treeCspSolver(easyGraphColoringProb, true);
 			Assert::IsTrue(easyGraphColoringProb.isCompletelyConsistentlyAssigned());
 		}
-
+		
 		TEST_METHOD(TestNaiveCycleCutset)
 		{
-			easyGraphColoringProb.unassignAllVariables();
-			const csp::AssignmentHistory<std::string> assignmentHistory = csp::naiveCycleCutset(easierGraphColoringProb);
+			easierGraphColoringProb.unassignAllVariables();
+			const csp::AssignmentHistory<std::string> assignmentHistory = csp::naiveCycleCutset(easierGraphColoringProb, true);
 			Assert::IsTrue(easierGraphColoringProb.isCompletelyConsistentlyAssigned());
 		}
 	};

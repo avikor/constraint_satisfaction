@@ -116,18 +116,22 @@ namespace csp
 
 		for (size_t i = topologicalySortedUnassginedVars.size() - 1; 0 < i; --i)
 		{
-			Variable<T>& currVariable = topologicalySortedUnassginedVars[i];
-			// CSPDO: might be problematic, removing from vector while iterating over it
+			Variable<T>& currVariable = topologicalySortedUnassginedVars.at(i);
 			const std::vector<T>& currDomain = currVariable.getDomain();
-			for (size_t j = 0; j < currDomain.size(); ++j)
+			for (auto it = currDomain.begin(); it != currDomain.end(); )
 			{
-				currVariable.assignByIdx(j);
-				if (constraintProblem.getConsistentDomain(topologicalySortedUnassginedVars[i - 1]).empty())
+				currVariable.assignByValue(*it);
+				if (constraintProblem.getConsistentDomain(topologicalySortedUnassginedVars.at(i - 1)).empty())
 				{
-					currVariable.removeFromDomainByIdx(j);
+					currVariable.removeFromDomainByValue(*it);
+				}
+				else
+				{
+					++it;
 				}
 				currVariable.unassign();
 			}
+
 			if (currDomain.empty())
 			{
 				return assignmentHistory;

@@ -161,6 +161,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="sudoku_problem.cpp" />
     <ClCompile Include="verbal_arithmetic_problem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +171,7 @@
     <ClInclude Include="magic_square_problem.h" />
     <ClInclude Include="n_queens_problem.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="sudoku_problem.h" />
     <ClInclude Include="verbal_arithmetic_problem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

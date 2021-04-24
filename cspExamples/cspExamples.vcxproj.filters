@@ -39,6 +39,9 @@
     <ClCompile Include="einstein_five_house_riddle_problem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sudoku_problem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="australia_map_coloring_problem.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="einstein_five_house_riddle_problem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sudoku_problem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

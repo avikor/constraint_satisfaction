@@ -9,7 +9,7 @@ class invalid_tabu_size_error : public std::invalid_argument
 {
 public:
 	invalid_tabu_size_error() :
-		invalid_argument{ "Given tabu_size is bigger than the number of variables in the constraint problem or\n"
+		invalid_argument{ "tabu_size input is bigger than the number of variables in the constraint problem or\n"
 			"(tabu_size + read_only_variables_size) is bigger than the number of variables in the constraint problem." }
 	{ }
 };
@@ -87,7 +87,7 @@ namespace csp
 		if (optReadOnlyVars && constraintProblem.getVariables().size() <= tabuSize + (*optReadOnlyVars).size() ||
 			constraintProblem.getVariables().size() <= tabuSize)
 		{
-			// CSPDO: test it
+			// CSPDO: test it in cspTests
 			throw invalid_tabu_size_error<T>{};
 		}
 		

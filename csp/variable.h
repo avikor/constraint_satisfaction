@@ -24,98 +24,6 @@ namespace csp
 	template <typename T>
 	class Variable final
 	{
-	private:
-		static std::optional<std::function<constexpr bool(PassType<T> left, PassType<T> right)>> init_compare()
-		{
-			// CSPDO: test it
-			static_assert(__is_to_stream_writable<std::ostream, T>::value, "T must be writable to std::cout.");
-
-			// CSPDO: test it
-			std::optional<std::function<bool(PassType<T> left, PassType<T> right)>> optCompare;
-			if constexpr (std::is_same<__T_less_than_operator_return_type<T>, bool>::value)
-			{
-				optCompare = std::less<T>();
-			}
-
-			return optCompare;
-		}
-
-		std::vector<T> init_domain(const std::unordered_set<T>& domain) noexcept
-		{
-			std::vector<T> vecDomain{ domain.cbegin(), domain.cend() };
-
-			if (m_optCompare)
-			{
-				std::sort(std::execution::par_unseq, vecDomain.begin(), vecDomain.end(), *m_optCompare);
-			}
-
-			return vecDomain;
-		}
-
-		size_t get_assignment_idx_for_value_in_sorted_domain(PassType<T> value) const
-		{
-			const auto itToBeginDomain = m_vecDomain.cbegin();
-			const auto itToValPosition = std::lower_bound(itToBeginDomain, m_vecDomain.cend(), value);
-			if (*itToValPosition != value)
-			{
-				throw uncontained_value_error<T>{ *this, value};
-			}
-			else
-			{
-				return itToValPosition - itToBeginDomain;
-			}
-		}
-
-		size_t get_assignment_idx_for_value_in_unsorted_domain(PassType<T> value) const
-		{
-			size_t idx = 0;
-			bool isValFound = false;
-			for (; idx < m_vecDomain.size(); ++idx)
-			{
-				if (m_vecDomain[idx] == value)
-				{
-					isValFound = true;
-					break;
-				}
-			}
-
-			if (!isValFound)
-			{
-				throw uncontained_value_error<T>{ *this, value };
-			}
-			else
-			{
-				return idx;
-			}
-		}
-
-		bool set_subset_domain_for_unsorted_domain(const std::vector<T>& vecSubsetDomain)
-		{
-			bool wasDomainShortened = false;
-			if (m_vecDomain.size() <= vecSubsetDomain.size())
-			{
-				return wasDomainShortened;
-			}
-
-			std::unordered_set<T> usetDomain{ m_vecDomain.cbegin(), m_vecDomain.cend() };
-			for (PassType<T> value : vecSubsetDomain)
-			{
-				if (!usetDomain.count(value))
-				{
-					return wasDomainShortened;
-				}
-			}
-
-			m_vecDomain = vecSubsetDomain;
-			m_size_tValueIdx = UNASSIGNED;
-			wasDomainShortened = true;
-			return wasDomainShortened;
-		}
-
-		std::optional<std::function<constexpr bool(PassType<T> left, PassType<T> right)>> m_optCompare;
-		std::vector<T> m_vecDomain;
-		size_t m_size_tValueIdx;
-		
 	public:
 		Variable<T>() = delete;
 		
@@ -230,9 +138,16 @@ namespace csp
 			return m_vecDomain;
 		}
 		
-		void setDomain(const std::vector<T>& domain)
+		void setDomain(const std::vector<T>& domain, bool checkUniqueness = false)
 		{
-			m_vecDomain = domain;
+			if(!checkUniqueness)
+				m_vecDomain = domain;
+			else
+			{
+				std::unordered_set<T> elems { domain.cbegin(), domain.cend() };
+				if(elems.size() == domain.size())
+					m_vecDomain = domain;
+			}
 		}
 
 		bool setSubsetDomain(const std::vector<T>& vecSubsetDomain, bool subsetDomainIsSorted = true)
@@ -248,11 +163,10 @@ namespace csp
 				if (!subsetDomainIsSorted)
 				{
 					std::vector<T>& noConstSubsetDomain = const_cast<std::vector<T>&>(vecSubsetDomain);
-					std::sort(std::execution::par_unseq, noConstSubsetDomain.begin(), noConstSubsetDomain.end());
+					std::sort(noConstSubsetDomain.begin(), noConstSubsetDomain.end());
 				}
 
-				if (std::includes(std::execution::par_unseq,
-					m_vecDomain.cbegin(), m_vecDomain.cend(), vecSubsetDomain.cbegin(), vecSubsetDomain.cend()))
+				if (std::includes(m_vecDomain.cbegin(), m_vecDomain.cend(), vecSubsetDomain.cbegin(), vecSubsetDomain.cend()))
 				{
 					m_vecDomain = vecSubsetDomain;
 					wasDomainShortened = true;
@@ -281,17 +195,21 @@ namespace csp
 			m_size_tValueIdx = UNASSIGNED;
 		}
 
+		void removeFromDomainByValue(PassType<T> val)
+		{
+			if (this->isAssigned())
+			{
+				throw domain_alteration_error<T>(*this);
+			}
+			auto it = std::find(m_vecDomain.cbegin(), m_vecDomain.cend(), val);
+			m_vecDomain.erase(it);
+			m_size_tValueIdx = UNASSIGNED;
+		}
+
 		friend std::ostream& operator<<(std::ostream& os, const Variable<T>& variable) noexcept
 		{
 			os << "(variable's value: ";
-			if (variable.isAssigned())
-			{
-				os << variable.getValue();
-			}
-			else
-			{
-				os << "unassigned";
-			}
+			variable.writeAssignmentToOutStream(os);
 
 			os << ", variable's domain: ";
 			char sep = '\0';
@@ -316,9 +234,9 @@ namespace csp
 
 		void writeAssignmentToOutStream(std::ostream& outStream) const noexcept
 		{
-			if (m_size_tValueIdx != UNASSIGNED)
+			if (this->isAssigned())
 			{
-				outStream << m_vecDomain[m_size_tValueIdx];
+				outStream << this->getValue();
 			}
 			else
 			{
@@ -385,6 +303,100 @@ namespace csp
 
 			return nameToVarRefMap;
 		}
+
+
+		private:
+			static std::optional<std::function<constexpr bool(PassType<T> left, PassType<T> right)>> init_compare()
+			{
+				// CSPDO: test it in cspTests
+				static_assert(__is_to_stream_writable<std::ostream, T>::value, "T must be writable to std::cout.");
+
+				// CSPDO: test it in cspTests
+				std::optional<std::function<bool(PassType<T> left, PassType<T> right)>> optCompare;
+				if constexpr (std::is_same<__T_less_than_operator_return_type<T>, bool>::value)
+				{
+					optCompare = std::less<T>();
+				}
+
+				return optCompare;
+			}
+
+			std::vector<T> init_domain(const std::unordered_set<T>& domain) noexcept
+			{
+				std::vector<T> vecDomain{ domain.cbegin(), domain.cend() };
+
+				if (m_optCompare)
+				{
+					std::sort(vecDomain.begin(), vecDomain.end(), *m_optCompare);
+				}
+
+				return vecDomain;
+			}
+
+			size_t get_assignment_idx_for_value_in_sorted_domain(PassType<T> value) const
+			{
+				const auto itToBeginDomain = m_vecDomain.cbegin();
+				const auto itToValPosition = std::lower_bound(itToBeginDomain, m_vecDomain.cend(), value);
+				if (*itToValPosition != value)
+				{
+					throw uncontained_value_error<T>{ *this, value};
+				}
+				else
+				{
+					return itToValPosition - itToBeginDomain;
+				}
+			}
+
+			size_t get_assignment_idx_for_value_in_unsorted_domain(PassType<T> value) const
+			{
+				size_t idx = 0;
+				bool isValFound = false;
+				for (; idx < m_vecDomain.size(); ++idx)
+				{
+					if (m_vecDomain[idx] == value)
+					{
+						isValFound = true;
+						break;
+					}
+				}
+
+				if (!isValFound)
+				{
+					throw uncontained_value_error<T>{ *this, value };
+				}
+				else
+				{
+					return idx;
+				}
+			}
+
+			bool set_subset_domain_for_unsorted_domain(const std::vector<T>& vecSubsetDomain)
+			{
+				bool wasDomainShortened = false;
+				if (m_vecDomain.size() <= vecSubsetDomain.size())
+				{
+					return wasDomainShortened;
+				}
+
+				std::unordered_set<T> usetDomain{ m_vecDomain.cbegin(), m_vecDomain.cend() };
+				for (PassType<T> value : vecSubsetDomain)
+				{
+					if (!usetDomain.count(value))
+					{
+						return wasDomainShortened;
+					}
+				}
+
+				m_vecDomain = vecSubsetDomain;
+				m_size_tValueIdx = UNASSIGNED;
+				wasDomainShortened = true;
+				return wasDomainShortened;
+			}
+
+
+			std::optional<std::function<constexpr bool(PassType<T> left, PassType<T> right)>> m_optCompare;
+			std::vector<T> m_vecDomain;
+			size_t m_size_tValueIdx;
 	};
 
 

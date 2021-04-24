@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "constraint_problem.h"
 
+// Arc Consistency 4 (AC4) algorithm
 
 namespace csp
 {

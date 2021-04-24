@@ -9,8 +9,8 @@ namespace csp
 	template <typename T>
 	class BaseGeneticConstraintProblem
 	{
-		/* Whoever wants to use geneticLocalSearch must inherit this class.
-		   See general_genetic_constraint_problem for an example. */	
+		/* Whoever wish to use geneticLocalSearch must inherit this class.
+		   See general_genetic_constraint_problem for an example. */
 
 	protected:
 		ConstraintProblem<T> m_ConstraintProb;
@@ -44,7 +44,7 @@ namespace csp
 
 		virtual std::vector<Assignment<T>> generatePopulation(unsigned int populationSize) = 0;
 
-		virtual unsigned int calculateFitness(const Assignment<T>& assignment) = 0;	/* Good fitness is high fitness*/
+		virtual unsigned int calculateFitness(const Assignment<T>& assignment) = 0;	/* Good fitness is high fitness */
 		
 		virtual std::vector<Assignment<T>> performNaturalSelection(std::vector<Assignment<T>>& population) = 0;
 

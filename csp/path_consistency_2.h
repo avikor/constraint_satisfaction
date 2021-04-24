@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "constraint_problem.h"
 
+// path consistency 2 (PC2) algorithm
 
 namespace csp
 {

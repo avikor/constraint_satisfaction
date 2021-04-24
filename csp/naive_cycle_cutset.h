@@ -12,7 +12,7 @@
    II. If the remaining CSP has a solution, return it together with the assignment for cycle cutset.
 
 
-How should we find a cycle cutset? Finding a minimal cycle cutset is a NP-hard problem. Iterative compression might be the best option.
+How should we find a cycle cutset? Finding a minimal cycle cutset is an NP-hard problem. Iterative compression might be the best option.
 Yet we don't require a minimal cycle cutset, just a cycle cutset.
 Ergo a naive algorithm is implemented:
  1. Define the length of a constraint to be the number of its variables.
@@ -78,7 +78,6 @@ namespace csp
 		}
 
 		std::unordered_set<Ref<Variable<T>>> reducedGraphVars;
-		// std::unordered_map<Ref<Variable<T>>, std::vector<Ref<Variable<T>>>>;
 		for (std::pair<const Ref<Variable<T>>, std::vector<Ref<Variable<T>>>>& varToNeighbors : reducedGraph)
 		{
 			reducedGraphVars.emplace(varToNeighbors.first);
@@ -92,12 +91,16 @@ namespace csp
 	// taken from: https://gist.github.com/thirdwing/953b146ba39c5f5ff562
 	// another alternative: https://gist.github.com/Alexhuszagh/67efb078a82616ed07529ed97586646a
 	template <typename T>
-	static std::vector<std::vector<T>> __cartesian_product(const std::vector<std::vector<T>>& v) {
+	static std::vector<std::vector<T>> __cartesian_product(const std::vector<std::vector<T>>& v) 
+	{
 		std::vector<std::vector<T>> s = { {} };
-		for (auto& u : v) {
+		for (auto& u : v) 
+		{
 			std::vector<std::vector<T>> r;
-			for (auto& x : s) {
-				for (auto y : u) {
+			for (auto& x : s) 
+			{
+				for (auto y : u) 
+				{
 					r.push_back(x);
 					r.back().push_back(y);
 				}
@@ -115,7 +118,7 @@ namespace csp
 	{
 		std::vector<std::vector<T>> domains;
 		domains.reserve(cutSetVars.size());
-		for (const Variable<T> var : cutSetVars)
+		for (const Variable<T>& var : cutSetVars)
 		{
 			domains.emplace_back(var.getDomain());
 		}
@@ -128,7 +131,8 @@ namespace csp
 				std::back_inserter(vecVarToValue), [](const Ref<Variable<T>>& var, PassType<T> value) -> std::pair<Ref<Variable<T>>, T>
 				{
 					return std::make_pair(var, value);
-				} );
+				} 
+			);
 
 			for (const std::pair<Ref<Variable<T>>, T>& varToValue : vecVarToValue)
 			{
@@ -174,11 +178,12 @@ namespace csp
 		const std::unordered_set<Ref<Variable<T>>> readOnlyVariables{ vecReadOnlyVariables.cbegin(), vecReadOnlyVariables.cend() };
 		std::vector<Ref<Constraint<T>>>& constraints = 
 			const_cast<std::vector<Ref<Constraint<T>>>&>(constraintProblem.getConstraints());
-		std::sort(std::execution::par_unseq, constraints.begin(), constraints.end(),
+		std::sort(constraints.begin(), constraints.end(),
 			[] (const Constraint<T>& left, const Constraint<T>& right) -> bool
 			{
 				return left.getVariables().size() > right.getVariables().size();
-			});
+			}
+		);
 		const ConstraintGraph<T>& constraintGraph = constraintProblem.getConstraintGraph();
 
 		const auto constraintsItToBegin = constraints.cbegin();
@@ -188,15 +193,15 @@ namespace csp
 		{
 			std::vector<Ref<Constraint<T>>> cutSetConstraints{ constraintsItToBegin, constraintsItToBegin + i };
 			std::unordered_set<Ref<Variable<T>>> cutSetVars;
-			for (const Constraint<T>& constr : constraints)
+			for (const Constraint<T>& cutSetConstr : cutSetConstraints)
 			{
-				const std::vector<Ref<Variable<T>>>& constraintVars = constr.getVariables();
+				const std::vector<Ref<Variable<T>>>& constraintVars = cutSetConstr.getVariables();
 				cutSetVars.insert(constraintVars.cbegin(), constraintVars.cend());
 			}
 
 			ConstraintGraph<T> reducedGraph;
 			reducedGraph.reserve(variables.size());
-			for (auto& varToNeighbors : constraintGraph)
+			for (const std::pair<Ref<Variable<T>>, std::vector<Ref<Variable<T>>>>& varToNeighbors : constraintGraph)
 			{
 				Variable<T>& var = varToNeighbors.first;
 				if (!cutSetVars.count(var))
@@ -215,8 +220,8 @@ namespace csp
 
 			if (__isTree<T>(reducedGraph))
 			{
-				std::vector<std::vector<T>> cosistentAssignmentsValyes = __getConsistentAssignmentsValues<T>(cutSetVars, 
-					cutSetConstraints, readOnlyVariables);
+				std::vector<std::vector<T>> allCosistentAssignmentsValues = 
+					__getConsistentAssignmentsValues<T>(cutSetVars, cutSetConstraints, readOnlyVariables);
 				std::vector<Ref<Variable<T>>> nonCutsetVars;
 				nonCutsetVars.reserve(variables.size());
 				for (Variable<T>& var : variables)
@@ -233,14 +238,15 @@ namespace csp
 					nonCutSetVarsToOriginalDomains.emplace(var, var.getDomain());
 				}
 
-				for (const std::vector<T>& consistentAssignmentValues : cosistentAssignmentsValyes)
+				for (const std::vector<T>& consistentAssignmentValues : allCosistentAssignmentsValues)
 				{
 					std::vector<std::pair<Ref<Variable<T>>, T>> vecVarToValue;
 					std::transform(cutSetVars.cbegin(), cutSetVars.cend(), consistentAssignmentValues.cbegin(),
 						std::back_inserter(vecVarToValue), [](Variable<T>& var, PassType<T> value) -> std::pair<Ref<Variable<T>>, PassType<T>>
 						{
-							return std::pair<Ref<Variable<T>>, T>{ var, value};
-						});
+							return std::pair<Ref<Variable<T>>, T>{ var, value };
+						}
+					);
 
 					for (const std::pair<Ref<Variable<T>>, T>& varToValue : vecVarToValue)
 					{
@@ -249,9 +255,8 @@ namespace csp
 							varToValue.first.get().assignByValue(varToValue.second);
 							if (writeAssignmentHistory)
 							{
-								// CSPDO: fix it
-								//assignmentHistory.emplace_back(varToValue.first, varToValue.first.get().getAssignmentIdx());
-							}	
+								assignmentHistory.emplace_back(varToValue.first.get(), varToValue.first.get().getValue());
+							}
 						}
 					}
 					for (Variable<T>& nonCutSetVariable : nonCutsetVars)
@@ -263,10 +268,32 @@ namespace csp
 					}
 
 					AssignmentHistory<T> treeCSPAssignmentHistory = treeCspSolver(constraintProblem, writeAssignmentHistory);
+					
+					// CSPDO: i think this if scope should be redundant
+					if (constraintProblem.isConsistentlyAssigned() && !constraintProblem.isCompletelyAssigned())
+					{
+						std::vector<Ref<Variable<T>>> unAssingedVars = constraintProblem.getUnassignedVariables();
+						for (Ref<Variable<T>>& variable : unAssingedVars)
+						{
+							const std::vector<T> consistentDomain = constraintProblem.getConsistentDomain(variable);
+							for (PassType<T> elem : consistentDomain)
+							{
+								variable.get().assignByValue(elem);
+								if (constraintProblem.isCompletelyConsistentlyAssigned())
+								{
+									if (writeAssignmentHistory)
+									{
+										assignmentHistory.insert(assignmentHistory.end(), treeCSPAssignmentHistory.cbegin(), treeCSPAssignmentHistory.cend());
+									}
+									return assignmentHistory;
+								}
+							}
+						}
+					}
+
 					if (writeAssignmentHistory)
 					{
-						// CSPDO: fix it
-						//assignmentHistory.insert(treeCSPAssignmentHistory.cbegin(), treeCSPAssignmentHistory.cend());
+						assignmentHistory.insert(assignmentHistory.end(), treeCSPAssignmentHistory.cbegin(), treeCSPAssignmentHistory.cend());
 					}
 					if (constraintProblem.isCompletelyConsistentlyAssigned())
 					{
@@ -285,7 +312,7 @@ namespace csp
 						}
 					}
 
-					for (std::pair<Ref<Variable<T>>, std::vector<T>> varToOriginalDomain : nonCutSetVarsToOriginalDomains)
+					for (const std::pair<Ref<Variable<T>>, std::vector<T>>& varToOriginalDomain : nonCutSetVarsToOriginalDomains)
 					{
 						if (!readOnlyVariables.count(varToOriginalDomain.first))
 						{
