@@ -2,14 +2,15 @@
 
 #include "pch.h"
 
-// CSPDOs in general:
+// CSPDO in general:
 // use make_tuple wherever you can
 // allow users to determine it they want the whole assignment history or simply the number of assignments and un-assignments.
 // rewrite various solvers so that they'll output their assignment history.
 // when we know in advance the allowed set of template types "T", using the explicit instantiation model is better
+// finish implementing sudoku problem as hill climbing and genetic local search problem
 
 
-// CSPDOs for c++20:
+// CSPDO for c++20:
 // use coroutines in backtracking
 // use wait and notify on atomics in ConstraintProblem<T>::isCompletelyConsistentlyAssigned()
 // use a concept for T in Variable<T>
