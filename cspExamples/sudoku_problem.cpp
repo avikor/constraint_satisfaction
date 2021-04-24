@@ -59,7 +59,7 @@ static std::unordered_set<unsigned int> __init_domain(unsigned int gridLen)
 static CoordsToVarRefsUMap __init_variables(std::vector<csp::Variable<unsigned int>>& variables, 
 	const std::vector<std::vector<unsigned int>>& grid)
 {
-	unsigned int gridLen = grid.size();
+	unsigned int gridLen = static_cast<unsigned int>(grid.size());
 	variables.reserve(gridLen * gridLen);
 	CoordsToVarRefsUMap coordsToVarRefsUMap;
 	coordsToVarRefsUMap.reserve(gridLen * gridLen);
