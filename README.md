@@ -91,17 +91,46 @@ int main()
     };
 
     csp::ConstraintProblem<unsigned int> pythagoreanTriplesProblem{ { pythagoreanTripleConstraint, totalOrderConstraint } };
-
-    csp::backtrackingSolver<unsigned int>(pythagoreanTriplesProblem);
-    std::cout << "x value: " << x.getValue() << '\n';
-    std::cout << "y value: " << y.getValue() << '\n';
-    std::cout << "z value: " << z.getValue() << '\n';
     
-    /*  RESULTS:
-    x value: 3
-    y value: 4
-    z value: 5 
-    */
+    const std::unordered_set<csp::Assignment<unsigned int>> sols =
+		csp::heuristicBacktrackingSolver_findAllSolutions<unsigned int>(
+			pythagoreanTriplesProblem,
+			csp::minimumRemainingValues_primarySelector<unsigned int>,
+			csp::degreeHeuristic_secondarySelector<unsigned int>,
+			csp::leastConstrainingValue<unsigned int>);
+
+	for (const csp::Assignment<unsigned int>& assignment : sols)
+	{
+		pythagoreanTriplesProblem.unassignAllVariables();
+		pythagoreanTriplesProblem.assignFromAssignment(assignment);
+		pythagoreanTriplesProblem.writeNameToAssignment(std::cout);
+		std::cout << '\n';
+	}
+        /*
+	x : 3
+	y : 4
+	z : 5
+
+	x : 9
+	y : 12
+	z : 15
+
+	x : 5
+	y : 12
+	z : 13
+
+	x : 6
+	y : 8
+	z : 10
+
+	x : 8
+	y : 15
+	z : 17
+
+	x : 12
+	y : 16
+	z : 20
+	*/
 }
 ```
 ## Example #2: Magic Square
@@ -205,6 +234,7 @@ int main()
         csp::degreeHeuristic_secondarySelector<unsigned int>,
         csp::leastConstrainingValue<unsigned int>);
     magicSquareProb.writeNameToAssignment(std::cout);
+    // to find all solutions see first example
     /*  RESULTS:
     1 : 8
     2 : 3
@@ -309,6 +339,7 @@ int main()
 			csp::degreeHeuristic_secondarySelector<unsigned int>,
 			csp::leastConstrainingValue<unsigned int>);
 	nQueensProblem.writeNameToAssignment(std::cout);
+    // to find all solutions see first example
     /*  RESULTS:
     0 : 3
     1 : 1

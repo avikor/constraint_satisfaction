@@ -7,7 +7,7 @@
 namespace csp
 {
 	template<typename T>
-	using Assignment = std::unordered_map<Ref<Variable<T>>, size_t>;
+	using Assignment = std::unordered_map<Ref<Variable<T>>, size_t>;	// variable to assignment idx
 
 	template<typename T>
 	using AssignmentHistory = std::deque<std::pair<Ref<Variable<T>>, std::optional<T>>>;
@@ -445,7 +445,7 @@ namespace csp
 			return outStringStream.str();
 		}
 
-		bool writeNameToAssignment(std::ostream& outStream)
+		bool writeNameToAssignment(std::ostream& outStream) const
 		{
 			bool successfulyWrittenAssignmentToOutStream = false;
 			if (m_umapNameToVariableRef.empty())
@@ -465,6 +465,18 @@ namespace csp
 
 			successfulyWrittenAssignmentToOutStream = true;
 			return successfulyWrittenAssignmentToOutStream;
+		}
+
+		std::unordered_map<std::string, T> GetNameToSolution() const
+		{
+			std::unordered_map<std::string, T> solution;
+			for (const std::pair<std::string, Ref<Variable<T>>>& nameToVar : m_umapNameToVariableRef)
+			{
+				const std::string& name = nameToVar.first;
+				const Variable<T>& var = nameToVar.second;
+				solution[name] = var.getValue();
+			}
+			return solution;
 		}
 
 		friend bool operator==(const ConstraintProblem<T>& left, const ConstraintProblem<T>& right) noexcept

@@ -6,8 +6,8 @@
 namespace csp
 {
 	template <typename T>
-	using StartStateGenarator = std::function<ConstraintProblem<T>(ConstraintProblem<T>&,
-		std::vector<Variable<T>>&, std::vector<Constraint<T>>&)>;
+	using StartStateGenarator = std::function<ConstraintProblem<T>(ConstraintProblem<T>& srcConstraintProblem,
+		std::vector<Variable<T>>& destVars, std::vector<Constraint<T>>& destConstraints)>;
 
 	template <typename T>
 	ConstraintProblem<T> generateStartStateRandomly(ConstraintProblem<T>& srcConstraintProblem,

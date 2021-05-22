@@ -395,6 +395,13 @@ namespace cspTests
 			Assert::AreEqual(graphColoringProb.toString(), outStringStream.str());
 		}
 
+		TEST_METHOD(TestGetNameToSolution)
+		{
+			// CSPDO: add test 
+			//std::unordered_map<std::string, std::string> str = graphColoringProb.GetNameToSolution()();
+			Assert::IsTrue(true);
+		}
+
 
 		TEST_METHOD(TestDuplicateConstraintError)
 		{

@@ -6,8 +6,8 @@
 namespace csp
 {
 	template <typename T>
-	using SuccessorGenerator = std::function<ConstraintProblem<T>(ConstraintProblem<T>&,
-		std::vector<Variable<T>>&, std::vector<Constraint<T>>&)>;
+	using SuccessorGenerator = std::function<ConstraintProblem<T>(ConstraintProblem<T>& srcConstraintProblem,
+		std::vector<Variable<T>>& destVars, std::vector<Constraint<T>>& destConstraints)>;
 
 	template <typename T>
 	ConstraintProblem<T> alterRandomVariableValuePair(ConstraintProblem<T>& srcConstraintProblem,

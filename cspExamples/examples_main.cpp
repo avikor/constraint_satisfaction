@@ -1,5 +1,6 @@
 
 #include "pch.h"
+#include "pythagorean_triples_problem.h"
 #include "australia_map_coloring_problem.h"
 #include "n_queens_problem.h"
 #include "magic_square_problem.h"
@@ -11,6 +12,51 @@
 
 int main()
 {
+	// uncomment to see solution
+	std::vector<csp::Variable<int>> pythTriplesVars;
+	std::vector<csp::Constraint<int>> pythTriplesConstrs;
+	csp::ConstraintProblem<int> pythagoreanTriplesProblem =
+		constructPythagoreanTriplesProblem(20, pythTriplesVars, pythTriplesConstrs);
+	const std::unordered_set<csp::Assignment<int>> sols =
+		csp::heuristicBacktrackingSolver_findAllSolutions<int>(
+			pythagoreanTriplesProblem,
+			csp::minimumRemainingValues_primarySelector<int>,
+			csp::degreeHeuristic_secondarySelector<int>,
+			csp::leastConstrainingValue<int>);
+
+	for (const csp::Assignment<int>& assignment : sols)
+	{
+		pythagoreanTriplesProblem.unassignAllVariables();
+		pythagoreanTriplesProblem.assignFromAssignment(assignment);
+		pythagoreanTriplesProblem.writeNameToAssignment(std::cout);
+		std::cout << '\n';
+	}
+	/*
+	x : 3
+	y : 4
+	z : 5
+
+	x : 9
+	y : 12
+	z : 15
+
+	x : 5
+	y : 12
+	z : 13
+
+	x : 6
+	y : 8
+	z : 10
+
+	x : 8
+	y : 15
+	z : 17
+
+	x : 12
+	y : 16
+	z : 20
+	*/
+
 	// uncomment to see solution
 	/*std::vector<csp::Variable<std::string>> auMapColoringVars;
 	std::vector<csp::Constraint<std::string>> auMapColoringConstrs;
@@ -41,14 +87,22 @@ int main()
 	/*std::vector<csp::Variable<unsigned int>> magicSquareVars;
 	std::vector<csp::Constraint<unsigned int>> magicSquareConstrs;
 	csp::ConstraintProblem<unsigned int> magicSquareProb = constructMagicSquareProblem(3, magicSquareVars, magicSquareConstrs);
-	std::cout << magicSquareProb;
-	std::cout << "\n----------------------------------------------------------------------------------------------------\n";
-	const csp::AssignmentHistory<unsigned int> magicSquareProbAssignmentHistory =
-		csp::heuristicBacktrackingSolver<unsigned int>(magicSquareProb,
+	const std::unordered_set<csp::Assignment<unsigned int>> sols = 
+		csp::heuristicBacktrackingSolver_findAllSolutions<unsigned int>(
+		magicSquareProb,
 		csp::minimumRemainingValues_primarySelector<unsigned int>,
 		csp::degreeHeuristic_secondarySelector<unsigned int>,
 		csp::leastConstrainingValue<unsigned int>);
-	magicSquareProb.writeNameToAssignment(std::cout);*/
+
+	for (const csp::Assignment<unsigned int>& assignment : sols)
+	{
+		magicSquareProb.unassignAllVariables();
+		magicSquareProb.assignFromAssignment(assignment);
+		magicSquareProb.writeNameToAssignment(std::cout);
+		std::cout << '\n';
+	}*/
+
+	
 
 	// uncomment to see solution
 	/*std::vector<csp::Variable<unsigned int>> carAssemblyVars;
@@ -99,7 +153,7 @@ int main()
 	}*/
 
 
-	std::vector<csp::Variable<unsigned int>> variables;
+	/*std::vector<csp::Variable<unsigned int>> variables;
 	std::vector<csp::Constraint<unsigned int>> constraints;
 	std::pair<csp::ConstraintProblem<unsigned int>, CoordsToVarRefsUMap> res = constructSudokuProblem("sudoku_puzzles/9x9_easy.txt", variables, constraints);
 	csp::ConstraintProblem<unsigned int>& sudokuProb = res.first;
@@ -110,7 +164,7 @@ int main()
 			csp::leastConstrainingValue<unsigned int>);
 
 	std::string strGrid = GetSudokuGridAsString(res.second);
-	std::cout << strGrid;
+	std::cout << strGrid;*/
 
 	/* 
 	example for sudoku_puzzles/25x25_easy.txt

@@ -94,7 +94,7 @@ namespace cspTests
 		{
 			std::vector<csp::Variable<std::string>> bestVars;
 			std::vector<csp::Constraint<std::string>> bestConstraints;
-			csp::ConstraintProblem<std::string>& bestProb = csp::randomRestartFirstChoiceHillClimbing(graphColoringProb, 
+			csp::ConstraintProblem<std::string> bestProb = csp::randomRestartFirstChoiceHillClimbing(graphColoringProb, 
 				bestConstraints, bestVars, 100, 100, 100);
 			Assert::IsTrue(bestProb.isCompletelyConsistentlyAssigned());
 		}
@@ -112,7 +112,7 @@ namespace cspTests
 		{
 			csp::GeneralGeneticConstraintProblem<std::string> graphColoringGeneticProb{ graphColoringProb, 0.1 };
 			csp::geneticLocalSearch(graphColoringGeneticProb, 1000, 1000, 0.1);
-			csp::ConstraintProblem<std::string>& graphColorProbFromGeneticProb = graphColoringGeneticProb.getConstraintProblem();
+			csp::ConstraintProblem<std::string> graphColorProbFromGeneticProb = graphColoringGeneticProb.getConstraintProblem();
 			Assert::IsTrue(graphColorProbFromGeneticProb.isCompletelyConsistentlyAssigned());
 		}
 

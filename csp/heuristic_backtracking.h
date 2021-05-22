@@ -111,6 +111,9 @@ namespace csp
 			}
 		}
 
+		if (constraintProblem.isCompletelyAssigned())
+			return;
+
 		const std::vector<Ref<Variable<T>>> candidateVars = primarySelector(constraintProblem);
 		Variable<T>& selectedVar = candidateVars.size() == 1 ? candidateVars[0].get() : secondarySelector(constraintProblem, candidateVars);
 
