@@ -43,7 +43,7 @@ namespace csp
 		Variable<T>& selectedVar = candidateVars.size() == 1 ? candidateVars[0].get() : secondarySelector(constraintProblem, candidateVars);
 
 		const std::vector<T> sortedDomain = optDomainSorter ? (*optDomainSorter)(constraintProblem, selectedVar) : selectedVar.getDomain();
-		for (PassType<T> value : sortedDomain)
+		for (T value : sortedDomain)
 		{
 			selectedVar.assignByValue(value);
 			if (writeAssignmentHistory)
@@ -118,7 +118,7 @@ namespace csp
 		Variable<T>& selectedVar = candidateVars.size() == 1 ? candidateVars[0].get() : secondarySelector(constraintProblem, candidateVars);
 
 		const std::vector<T> sortedDomain = optDomainSorter ? (*optDomainSorter)(constraintProblem, selectedVar) : selectedVar.getDomain();
-		for (PassType<T> value : sortedDomain)
+		for (T value : sortedDomain)
 		{
 			selectedVar.assignByValue(value);
 

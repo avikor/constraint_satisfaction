@@ -145,7 +145,7 @@ namespace csp
 			{
 				return assignmentHistory;
 			}
-			PassType<T> value = consistentDomain.back();
+			T value = consistentDomain.back();
 			var.assignByValue(value);
 			if (writeAssignmentHistory)
 			{

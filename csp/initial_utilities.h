@@ -26,8 +26,10 @@ namespace csp
 
 	constexpr size_t SIZE_LIMIT = 40;	// in bytes
 
-	template <typename T>
-	using PassType = typename std::conditional_t<sizeof(T) <= SIZE_LIMIT, T, const T&>;
+	//typedef std::conditional<sizeof(int) >= sizeof(double), int, double>::type PassType
+
+	//template <typename T>
+	//using PassType = typename std::conditional_t<sizeof(T) <= SIZE_LIMIT, T, const T&>;
 }
 
 namespace csp
@@ -41,7 +43,7 @@ namespace csp
 	{ };
 
 	template <typename T>
-	bool __compare_T(PassType<T> left, PassType<T> right)
+	bool __compare_T(T left, T right)
 	{
 		/* CSPDO: if T is implicitly convertible to boolean,
 		then the compiler would convert left and right to booleans and perform
@@ -50,8 +52,8 @@ namespace csp
 		return left < right;
 	}
 
-	template <typename T>
-	using __T_less_than_operator_return_type = typename std::result_of<decltype(__compare_T<T>)&(const T& left, const T& right)>::type;
+	//template <typename T>
+	//using __T_less_than_operator_return_type = typename std::result_of<decltype(__compare_T<T>)&(const T& left, const T& right)>::type;
 }
 
 

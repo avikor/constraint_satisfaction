@@ -53,7 +53,7 @@ namespace csp
 		unsigned int valuesAmount;
 		T targetSum;
 
-		ExactLengthExactSum(unsigned int _valsAmount, PassType<T> valuesSum): valuesAmount{ _valsAmount }, targetSum{ valuesSum }
+		ExactLengthExactSum(unsigned int _valsAmount, T valuesSum): valuesAmount{ _valsAmount }, targetSum{ valuesSum }
 		{
 			static_assert(std::is_default_constructible_v<T>, "T must be default constructible for std::accumulate");
 		}

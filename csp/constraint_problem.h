@@ -610,7 +610,7 @@ namespace csp
 		{
 			hash<T> hasher;
 			size_t hashValue = 0;
-			for (csp::PassType<T> elem : uset)
+			for (T elem : uset)
 			{
 				hashValue += hasher(elem);
 			}

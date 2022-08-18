@@ -128,7 +128,7 @@ namespace csp
 		{
 			std::vector<std::pair<Ref<Variable<T>>, T>> vecVarToValue;
 			std::transform(cutSetVars.cbegin(), cutSetVars.cend(), assignmentValues.cbegin(), 
-				std::back_inserter(vecVarToValue), [](const Ref<Variable<T>>& var, PassType<T> value) -> std::pair<Ref<Variable<T>>, T>
+				std::back_inserter(vecVarToValue), [](const Ref<Variable<T>>& var, T value) -> std::pair<Ref<Variable<T>>, T>
 				{
 					return std::make_pair(var, value);
 				} 
@@ -242,7 +242,7 @@ namespace csp
 				{
 					std::vector<std::pair<Ref<Variable<T>>, T>> vecVarToValue;
 					std::transform(cutSetVars.cbegin(), cutSetVars.cend(), consistentAssignmentValues.cbegin(),
-						std::back_inserter(vecVarToValue), [](Variable<T>& var, PassType<T> value) -> std::pair<Ref<Variable<T>>, PassType<T>>
+						std::back_inserter(vecVarToValue), [](Variable<T>& var, T value) -> std::pair<Ref<Variable<T>>, T>
 						{
 							return std::pair<Ref<Variable<T>>, T>{ var, value };
 						}
@@ -276,7 +276,7 @@ namespace csp
 						for (Ref<Variable<T>>& variable : unAssingedVars)
 						{
 							const std::vector<T> consistentDomain = constraintProblem.getConsistentDomain(variable);
-							for (PassType<T> elem : consistentDomain)
+							for (T elem : consistentDomain)
 							{
 								variable.get().assignByValue(elem);
 								if (constraintProblem.isCompletelyConsistentlyAssigned())
